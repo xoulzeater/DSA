@@ -5,14 +5,17 @@
  */
 package Manager;
 
+import java.util.Scanner;
+
 /**
  *
  * @author User
  */
 public class ResourceAssignManager {
+    private Scanner sc ;
     
     public ResourceAssignManager(){
-        
+        sc = new Scanner(System.in);
     }
     
     public void addResourceAssign(){

@@ -36,7 +36,7 @@ public class VictimManager {
 
         GregorianCalendar gc = MyConverter.readStringCalendar(
                 "Please enter the date of birth(dd/mm/yyyy):",
-                "Please enter the valid date format!!",false);
+                "Please enter the valid date format!!",false,"dd/MM/yyyy");
 
         System.out.print("Please enter the victim address:");
         String address = sc.nextLine();
@@ -82,7 +82,7 @@ public class VictimManager {
 
             GregorianCalendar gc = MyConverter.readStringCalendar(
                     "Please enter your new victim date of birth(dd/mm/yyyy):",
-                    "Invalid date format, please try again",true);
+                    "Invalid date format, please try again",true,"dd/MM/yyyy");
             String gender = "";
             do {
                 System.out.print("Please enter your new gender(M/F):");

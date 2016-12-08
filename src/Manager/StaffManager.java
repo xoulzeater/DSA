@@ -36,8 +36,8 @@ public class StaffManager {
         name = sc.nextLine();
 
         GregorianCalendar dob = MyConverter.readStringCalendar(
-                "Please enter your date of birth:",
-                "Invalid date format, please try again!",false);
+                "Please enter your date of birth(dd/MM/yyyy):",
+                "Invalid date format, please try again!",false,"dd/MM/yyyy");
 
         String gender = MyConverter.requestGender();
         Staff staff = new Staff(0, name, dob, "Available", gender);
@@ -132,8 +132,8 @@ public class StaffManager {
             String name = sc.nextLine();
 
             GregorianCalendar dob = MyConverter.readStringCalendar(
-                    "Please enter your date of birth:",
-                    "Invalid date format, please try again!",true);
+                    "Please enter your date of birth(dd/MM/yyyy HH:mm:ss):",
+                    "Invalid date format, please try again!",true,"dd/MM/yyyy");
             
             
             System.out.print("Please enter your date of birth:");

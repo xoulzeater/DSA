@@ -42,12 +42,12 @@ public class TaskManager {
         boolean checkDate = false;
         do {
             start = MyConverter.readStringCalendar(
-                    "Please enter the start date:",
-                    "Please enter the correct format of start date!!",false);
+                    "Please enter the start date(dd/mm/yyyy hh:mm:ss):",
+                    "Please enter the correct format of start date!!",false,"dd/MM/yyyy HH:mm:ss");
             end = MyConverter.readStringCalendar(
-                    "Please enter the end date:",
-                    "Please enter the correct format of end date!!",false);
-            if (MyConverter.getDays(start, end) < 0) {
+                    "Please enter the end date(dd/mm/yyyy hh:mm:ss):",
+                    "Please enter the correct format of end date!!",false,"dd/MM/yyyy HH:mm:ss");
+            if (start.after(end)) {
                 System.out.println("Start date cannot larger than end date!!");
             } else {
                 checkDate = true;
@@ -63,7 +63,7 @@ public class TaskManager {
         if (validOption) {
             int results = db.insertTask(newTask);
             if (results > 0) {
-                int lastId = db.getLastId(ConnectDbStaff.TASK);
+                int lastId = db.getLastId(ConnectDbStaff.TASK,"TASK_ID");
                 System.out.println("Task successfully insert to database!! Your task id is :" + lastId);
             } else {
                 System.out.println("Task failed to insert to database!!");
@@ -103,18 +103,18 @@ public class TaskManager {
             boolean checkDate = false;
             do {
                 start = MyConverter.readStringCalendar(
-                        "Please enter the start date:",
-                        "Please enter the correct format of start date!!",true);
+                        "Please enter the start date(dd/MM/yyyy HH:mm:ss):",
+                        "Please enter the correct format of start date!!",true,"dd/MM/yyyy HH:mm:ss");
                 end = MyConverter.readStringCalendar(
-                        "Please enter the end date:",
-                        "Please enter the correct format of end date!!",true);
+                        "Please enter the end date(dd/MM/yyyy HH:mm:ss):",
+                        "Please enter the correct format of end date!!",true,"dd/MM/yyyy HH:mm:ss");
                 if(start == null){
                     start = result.getStartDate();
                 }
                 if(end == null){
                     end = result.getEndDate();
                 }
-                if (MyConverter.getDays(start, end) < 0) {
+                if (start.after(end)) {
                     System.out.println("Start date cannot larger than end date!!");
                 } else {
                     checkDate = true;
@@ -174,8 +174,8 @@ public class TaskManager {
         for (Task temp : taskList) {
             String msg = String.format("|%-5d | %-20s | %-5d | %-10s | %-10s |", temp.getId(),
                     temp.getName(), temp.getManPower(),
-                    MyConverter.displayDate(temp.getStartDate()),
-                    MyConverter.displayDate(temp.getEndDate()));
+                    MyConverter.getTime(temp.getStartDate()),
+                    MyConverter.getTime(temp.getEndDate()));
             System.out.println(msg);
         }
         System.out.print("Press enter to continue...");
@@ -190,9 +190,9 @@ public class TaskManager {
         System.out.println("Task Description:" + task.getDescription());
         System.out.println("Task Man Power remaining:" + task.getManPower());
         System.out.println("Task issue time:"
-                + MyConverter.displayDate(task.getStartDate()));
+                + MyConverter.getTime(task.getStartDate()));
         System.out.println("Task end time:"
-                + MyConverter.displayDate(task.getEndDate()));
+                + MyConverter.getTime(task.getEndDate()));
         System.out.println("----------------------------------");
 
     }

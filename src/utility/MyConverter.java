@@ -19,8 +19,6 @@ import java.util.Scanner;
  */
 public class MyConverter {
 
-
-
     public static GregorianCalendar calcTime(Date time, Date date) {
         GregorianCalendar gcTime = new GregorianCalendar();
         gcTime.setTimeInMillis(time.getTime());
@@ -46,15 +44,6 @@ public class MyConverter {
 
     }
 
-    public static String displayTime(Date date) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(date.getTime());
-        String timeString = String.format("%02d", gc.get(Calendar.HOUR_OF_DAY)) + ":"
-                + String.format("%02d", gc.get(Calendar.MINUTE)) + ":"
-                + String.format("%02d", gc.get(Calendar.SECOND));
-        return timeString;
-
-    }
 
     public static String displayTime(GregorianCalendar gc) {
         String timeString = String.format("%02d", gc.get(Calendar.HOUR_OF_DAY)) + ":"
@@ -63,7 +52,6 @@ public class MyConverter {
         return timeString;
 
     }
-
 
     public static String displayDate(GregorianCalendar gc) {
         String dateString = String.format("%02d", gc.get(Calendar.DATE))
@@ -143,19 +131,52 @@ public class MyConverter {
         return elapsed;
     }
 
+    public static long getDaysTimeDiff() {
+        String dateStop = "01/14/2012 09:29:58";
+        String dateStart = "01/15/2012 10:31:48";
+
+        //HH converts hour in 24 hours format (0-23), day calculation
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+        Date d1 = null;
+        Date d2 = null;
+
+        try {
+            d1 = format.parse(dateStart);
+            d2 = format.parse(dateStop);
+
+            //in milliseconds
+            long diff = d2.getTime() - d1.getTime();
+
+            long diffSeconds = diff / 1000 % 60;
+            long diffMinutes = diff / (60 * 1000) % 60;
+            long diffHours = diff / (60 * 60 * 1000) % 24;
+            long diffDays = diff / (24 * 60 * 60 * 1000);
+
+            System.out.print(diffDays + " days, ");
+            System.out.print(diffHours + " hours, ");
+            System.out.print(diffMinutes + " minutes, ");
+            System.out.print(diffSeconds + " seconds.");
+            return diffSeconds;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public static GregorianCalendar convertDateToGregorian(Date date) {
         GregorianCalendar gc = new GregorianCalendar();
         gc.setTimeInMillis(date.getTime());
         return gc;
     }
 
-    public static int requestIntegerValue(String requestMsg, String invalidMsg,boolean allowEmpty) {
+    public static int requestIntegerValue(String requestMsg, String invalidMsg, boolean allowEmpty) {
         Scanner sc = new Scanner(System.in);
         String quantity = "";
         do {
             System.out.print(requestMsg);
             quantity = sc.nextLine();
-            if(allowEmpty && quantity.isEmpty()){
+            if (allowEmpty && quantity.isEmpty()) {
                 return -1;
             }
             if (!quantity.matches("^[0-9]+$")) {
@@ -165,17 +186,17 @@ public class MyConverter {
         return Integer.parseInt(quantity);
     }
 
-    public static GregorianCalendar readStringCalendar(String requestMsg,String invalidMsg,boolean allowEmpty){
+    public static GregorianCalendar readStringCalendar(String requestMsg, String invalidMsg, boolean allowEmpty,String dateFormat) {
         Scanner sc = new Scanner(System.in);
         boolean valid = false;
-        GregorianCalendar gc = new GregorianCalendar();  
+        GregorianCalendar gc = new GregorianCalendar();
         do {
             System.out.print(requestMsg);
             String startDateString = sc.nextLine();
-            if(allowEmpty && startDateString.isEmpty()){
+            if (allowEmpty && startDateString.isEmpty()) {
                 return null;
             }
-            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            DateFormat df = new SimpleDateFormat(dateFormat);
             df.setLenient(false);
             Date startDate;
             try {
@@ -183,13 +204,13 @@ public class MyConverter {
                 gc.setTimeInMillis(startDate.getTime());
                 valid = true;
             } catch (ParseException e) {
-              
-                    System.out.println(invalidMsg);
+
+                System.out.println(invalidMsg);
             }
-        } while (!valid );
+        } while (!valid);
         return gc;
     }
-    
+
     public static boolean validateOption(String msg) {
         Scanner sc = new Scanner(System.in);
         for (;;) {
@@ -209,7 +230,7 @@ public class MyConverter {
     public static String requestGender() {
         Scanner sc = new Scanner(System.in);
         String gender = "";
-        String genderOption="";
+        String genderOption = "";
         do {
             System.out.print("Please enter the gender(M/F):");
             gender = sc.nextLine().toLowerCase();
@@ -218,7 +239,7 @@ public class MyConverter {
                     genderOption = "Male";
                     break;
                 case "f":
-                    genderOption =  "Female";
+                    genderOption = "Female";
                     break;
                 default:
                     System.out.println("Invalid gender please enter again!");
@@ -231,8 +252,11 @@ public class MyConverter {
         Scanner sc = new Scanner(System.in);
         //GregorianCalendar gc = MyConverter.readStringCalendar("Please enter your date:", "Invalid date, please try again!!;", true);
         System.out.println("End");
-       
-        
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.set(Calendar.HOUR_OF_DAY,gc.get(Calendar.HOUR_OF_DAY)+1);
+        int c = MyConverter.getHours(gc, new GregorianCalendar());
+        System.out.println(c);
+
     }
 
 }

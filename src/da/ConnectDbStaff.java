@@ -100,7 +100,7 @@ public class ConnectDbStaff {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-
+                
                 staff = new Staff(rs.getInt(1), rs.getString(2),
                         MyConverter.convertDateToGregorian(rs.getDate(3)),
                         rs.getString(4),
@@ -166,8 +166,8 @@ public class ConnectDbStaff {
             while (rs.next()) {
 
                 Task task = new Task(rs.getInt(1), rs.getString(2), rs.getString(3),
-                        rs.getInt(4), MyConverter.convertDateToGregorian(rs.getDate(5)),
-                        MyConverter.convertDateToGregorian(rs.getDate(6)));
+                        rs.getInt(4), MyConverter.convertDateToGregorian(rs.getTimestamp(5)),
+                        MyConverter.convertDateToGregorian(rs.getTimestamp(6)));
                 taskList.add(task);
             }
         } catch (SQLException ex) {
@@ -198,7 +198,7 @@ public class ConnectDbStaff {
     public int insertTask(Task task) {
         runConnection();
         String query = "INSERT INTO " + TASK
-                + " (NAME,DESCRIPTION,MANPOWER,START_TIME)"
+                + " (NAME,DESCRIPTION,MANPOWER,START_TIME,END_TIME)"
                 + " VALUES (?,?,?,?,?)";
         int result = 0;
         try {
@@ -206,10 +206,12 @@ public class ConnectDbStaff {
             stmt.setString(1, task.getName());
             stmt.setString(2, task.getDescription());
             stmt.setInt(3, task.getManPower());
-            java.sql.Date startDate
-                    = new java.sql.Date(task.getStartDate().getTimeInMillis());
-            stmt.setDate(4, startDate);
-            stmt.setDate(5, null);
+            java.sql.Timestamp startDate
+                    = new java.sql.Timestamp(task.getStartDate().getTimeInMillis());
+            stmt.setTimestamp(4, startDate);
+            java.sql.Timestamp endDate = 
+                    new java.sql.Timestamp(task.getEndDate().getTimeInMillis());
+            stmt.setTimestamp(5, endDate);
             result = stmt.executeUpdate();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -219,15 +221,15 @@ public class ConnectDbStaff {
         return result;
     }
 
-    public int getLastId(String table) {
+    public int getLastId(String table,String pk) {
         runConnection();
-        String query = "SELECT * FROM " + table + " ORDER BY res_id DESC FETCH FIRST ROW ONLY";
+        String query = "SELECT * FROM " + table + " ORDER BY "+ pk +" DESC FETCH FIRST ROW ONLY";
         int result = -1;
         try {
             stmt = con.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                result = rs.getInt(0);
+                result = rs.getInt(1);
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -247,8 +249,8 @@ public class ConnectDbStaff {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 task = new Task(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4),
-                        MyConverter.convertDateToGregorian(rs.getDate(4)),
-                        MyConverter.convertDateToGregorian(rs.getDate(5)));
+                        MyConverter.convertDateToGregorian(rs.getTimestamp(4)),
+                        MyConverter.convertDateToGregorian(rs.getTimestamp(5)));
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -284,12 +286,12 @@ public class ConnectDbStaff {
             stmt.setString(1,task.getName());
             stmt.setString(2, task.getDescription());
             stmt.setInt(3, task.getManPower());
-            java.sql.Date date = new java.sql.Date(
+            java.sql.Timestamp date = new java.sql.Timestamp(
                     task.getStartDate().getTimeInMillis());
-            stmt.setDate(4, date);
-            java.sql.Date date2 = new java.sql.Date(
+            stmt.setTimestamp(4, date);
+            java.sql.Timestamp date2 = new java.sql.Timestamp(
                     task.getEndDate().getTimeInMillis());
-            stmt.setDate(5, date2);
+            stmt.setTimestamp(5, date2);
             stmt.setInt(6, task.getId());
             result = stmt.executeUpdate();
         } catch (SQLException ex) {
