@@ -37,7 +37,7 @@ public class StaffManager {
 
         GregorianCalendar dob = MyConverter.readStringCalendar(
                 "Please enter your date of birth:",
-                "Invalid date format, please try again!");
+                "Invalid date format, please try again!",false);
 
         String gender = MyConverter.requestGender();
         Staff staff = new Staff(0, name, dob, "Available", gender);
@@ -78,7 +78,7 @@ public class StaffManager {
         System.out.println("| \t !!! DELETE STAFF !!! \t|");
         System.out.println("====================================");
         int staffId = MyConverter.requestIntegerValue("Please enter the staff id:",
-                "Invalid format of staff id, must contain only numeirc characters.");
+                "Invalid format of staff id, must contain only numeirc characters.",false);
 
         Staff result = db.selectStaff(staffId);
         if (result == null) {
@@ -118,7 +118,7 @@ public class StaffManager {
 
         int staffId = MyConverter.requestIntegerValue(
                 "Please enter your staff id:",
-                "Invalid staff id, please try again!!");
+                "Invalid staff id, please try again!!",false);
 
         Staff result = db.selectStaff(staffId);
         if (result == null) {
@@ -133,7 +133,13 @@ public class StaffManager {
 
             GregorianCalendar dob = MyConverter.readStringCalendar(
                     "Please enter your date of birth:",
-                    "Invalid date format, please try again!");
+                    "Invalid date format, please try again!",true);
+            
+            
+            System.out.print("Please enter your date of birth:");
+            String date = sc.nextLine();
+            
+            
 
             String gender = MyConverter.requestGender();
             String status = "";

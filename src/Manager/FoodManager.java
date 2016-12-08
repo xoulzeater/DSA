@@ -43,7 +43,8 @@ public class FoodManager {
         String type = "";
         System.out.print("Please enter the resource type:");
         type = sc.nextLine();
-        int amount = MyConverter.requestIntegerValue("Please enter the quantity:", "Please enter the valid quantity!");
+        int amount = MyConverter.requestIntegerValue("Please enter the quantity:", 
+                "Please enter the valid quantity!",false);
 
         Resource resource = new Resource(0, name, type, amount, "Available");
         int result = db.insertResource(resource);
@@ -85,7 +86,7 @@ public class FoodManager {
 
         int resCode = MyConverter.requestIntegerValue(
                 "Please enter the resource code:",
-                "Please enter the valid numeric id!");
+                "Please enter the valid numeric id!",false);
 
         Resource result = db.selectResource(resCode);
 
@@ -129,7 +130,7 @@ public class FoodManager {
 
         int resourceCode = MyConverter.requestIntegerValue(
                 "Please enter the resource code:",
-                "Please enter the valid numeric id!");
+                "Please enter the valid numeric id!",false);
 
         Resource result = db.selectResource(resourceCode);
 

@@ -36,7 +36,7 @@ public class VictimManager {
 
         GregorianCalendar gc = MyConverter.readStringCalendar(
                 "Please enter the date of birth(dd/mm/yyyy):",
-                "Please enter the valid date format!!");
+                "Please enter the valid date format!!",false);
 
         System.out.print("Please enter the victim address:");
         String address = sc.nextLine();
@@ -68,7 +68,7 @@ public class VictimManager {
 
         int victimId = MyConverter.requestIntegerValue(
                 "Please enter your victim id:",
-                "Invalid Victim Id format, please try again!!");
+                "Invalid Victim Id format, please try again!!",false);
         Victim result = db.selectVictim(victimId);
         if (result == null) {
             System.out.println("No Victim information found in the database!");
@@ -82,7 +82,7 @@ public class VictimManager {
 
             GregorianCalendar gc = MyConverter.readStringCalendar(
                     "Please enter your new victim date of birth(dd/mm/yyyy):",
-                    "Invalid date format, please try again");
+                    "Invalid date format, please try again",true);
             String gender = "";
             do {
                 System.out.print("Please enter your new gender(M/F):");
@@ -170,7 +170,7 @@ public class VictimManager {
 
         int victimId = MyConverter.requestIntegerValue(
                 "Please enter the victim id:",
-                "Invalid format of victim id!!");
+                "Invalid format of victim id!!",false);
         Victim result = db.selectVictim(victimId);
         if (result == null) {
             System.out.println("No such resource found in the list.");

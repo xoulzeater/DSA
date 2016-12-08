@@ -19,19 +19,7 @@ import java.util.Scanner;
  */
 public class MyConverter {
 
-    public static GregorianCalendar getAfterDuration(Date date, int duration) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(date.getTime());
-        gc.set(Calendar.MINUTE, gc.get(Calendar.MINUTE) + duration);
-        return gc;
-    }
 
-    public static GregorianCalendar getAfterDays(Date date, int duration) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(date.getTime());
-        gc.set(Calendar.DATE, gc.get(Calendar.DATE) + duration);
-        return gc;
-    }
 
     public static GregorianCalendar calcTime(Date time, Date date) {
         GregorianCalendar gcTime = new GregorianCalendar();
@@ -76,15 +64,6 @@ public class MyConverter {
 
     }
 
-    public static String displayDate(Date date) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(date.getTime());
-        String dateString = String.format("%02d", gc.get(Calendar.DATE))
-                + "/" + String.format("%02d", (gc.get(Calendar.MONTH) + 1)) + "/"
-                + String.format("%02d", gc.get(Calendar.YEAR));
-        return dateString;
-
-    }
 
     public static String displayDate(GregorianCalendar gc) {
         String dateString = String.format("%02d", gc.get(Calendar.DATE))
@@ -170,12 +149,15 @@ public class MyConverter {
         return gc;
     }
 
-    public static int requestIntegerValue(String requestMsg, String invalidMsg) {
+    public static int requestIntegerValue(String requestMsg, String invalidMsg,boolean allowEmpty) {
         Scanner sc = new Scanner(System.in);
         String quantity = "";
         do {
             System.out.print(requestMsg);
             quantity = sc.nextLine();
+            if(allowEmpty && quantity.isEmpty()){
+                return -1;
+            }
             if (!quantity.matches("^[0-9]+$")) {
                 System.out.println(invalidMsg);
             }
@@ -183,13 +165,16 @@ public class MyConverter {
         return Integer.parseInt(quantity);
     }
 
-    public static GregorianCalendar readStringCalendar(String requestMsg, String invalidMsg) {
+    public static GregorianCalendar readStringCalendar(String requestMsg,String invalidMsg,boolean allowEmpty){
         Scanner sc = new Scanner(System.in);
         boolean valid = false;
-        GregorianCalendar gc = new GregorianCalendar();
+        GregorianCalendar gc = new GregorianCalendar();  
         do {
             System.out.print(requestMsg);
             String startDateString = sc.nextLine();
+            if(allowEmpty && startDateString.isEmpty()){
+                return null;
+            }
             DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
             df.setLenient(false);
             Date startDate;
@@ -198,12 +183,13 @@ public class MyConverter {
                 gc.setTimeInMillis(startDate.getTime());
                 valid = true;
             } catch (ParseException e) {
-                System.out.println(invalidMsg);
+              
+                    System.out.println(invalidMsg);
             }
-        } while (!valid);
+        } while (!valid );
         return gc;
     }
-
+    
     public static boolean validateOption(String msg) {
         Scanner sc = new Scanner(System.in);
         for (;;) {
@@ -243,16 +229,10 @@ public class MyConverter {
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        for (;;) {
-
-//            
-//         System.out.println("Please enter your date of birth");
-//        String date = sc.nextLine();
-//        if(date.matches("(^(((0[1-9]|1[0-9]|2[0-8])[\\/](0[1-9]|1[012]))|((29|30|31)[\\/](0[13578]|1[02]))|((29|30)[\\/](0[4,6,9]|11)))[\\/](19|[2-9][0-9])\\d\\d$)|(^29[\\/]02[\\/](19|[2-9][0-9])(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96)$)"))
-//            System.out.println("true date");
-//        else 
-//            System.out.println("false date");
-        }
+        //GregorianCalendar gc = MyConverter.readStringCalendar("Please enter your date:", "Invalid date, please try again!!;", true);
+        System.out.println("End");
+       
+        
     }
 
 }

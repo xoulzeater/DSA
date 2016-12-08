@@ -8,7 +8,6 @@ package Manager;
 import adt.ListInterface;
 import da.ConnectDbStaff;
 import domain.Task;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
 import utility.MyConverter;
@@ -19,8 +18,8 @@ import utility.MyConverter;
  */
 public class TaskManager {
 
-    private Scanner sc;
-    private ConnectDbStaff db;
+    private final Scanner sc;
+    private final ConnectDbStaff db;
 
     public TaskManager() {
         db = new ConnectDbStaff();
@@ -37,17 +36,17 @@ public class TaskManager {
         String desc = sc.nextLine();
         int manPower = MyConverter.requestIntegerValue(
                 "Please enter your task man power:",
-                "Please enter numeric value only!!");
+                "Please enter numeric value only!!",false);
         GregorianCalendar start;
         GregorianCalendar end;
         boolean checkDate = false;
         do {
             start = MyConverter.readStringCalendar(
                     "Please enter the start date:",
-                    "Please enter the correct format of start date!!");
+                    "Please enter the correct format of start date!!",false);
             end = MyConverter.readStringCalendar(
                     "Please enter the end date:",
-                    "Please enter the correct format of end date!!");
+                    "Please enter the correct format of end date!!",false);
             if (MyConverter.getDays(start, end) < 0) {
                 System.out.println("Start date cannot larger than end date!!");
             } else {
@@ -80,7 +79,7 @@ public class TaskManager {
         System.out.println("----------------------------");
         int taskId = MyConverter.requestIntegerValue(
                 "Please enter the task id:",
-                "Invalid task id, please try again!!");
+                "Invalid task id, please try again!!",false);
 
         Task result = db.selectTask(taskId);
         if (result == null) {
@@ -95,17 +94,26 @@ public class TaskManager {
             String desc = sc.nextLine();
             int manPower = MyConverter.requestIntegerValue(
                     "Please enter the new Man power:",
-                    "Invalid input, please enter only numeric value!!");
+                    "Invalid input, please enter only numeric value!!",true);
+            if(manPower == -1){
+                manPower = result.getManPower();
+            }
             GregorianCalendar start;
             GregorianCalendar end;
             boolean checkDate = false;
             do {
                 start = MyConverter.readStringCalendar(
                         "Please enter the start date:",
-                        "Please enter the correct format of start date!!");
+                        "Please enter the correct format of start date!!",true);
                 end = MyConverter.readStringCalendar(
                         "Please enter the end date:",
-                        "Please enter the correct format of end date!!");
+                        "Please enter the correct format of end date!!",true);
+                if(start == null){
+                    start = result.getStartDate();
+                }
+                if(end == null){
+                    end = result.getEndDate();
+                }
                 if (MyConverter.getDays(start, end) < 0) {
                     System.out.println("Start date cannot larger than end date!!");
                 } else {
@@ -135,7 +143,7 @@ public class TaskManager {
 
         int taskId = MyConverter.requestIntegerValue(
                 "Please enter the task id:",
-                "Invalid task id, please try again!!");
+                "Invalid task id, please try again!!",false);
 
         Task result = db.selectTask(taskId);
         if (result == null) {
