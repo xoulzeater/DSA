@@ -6,7 +6,9 @@
 package da;
 
 import adt.ListInterface;
+import adt.SortedListInterface;
 import domain.Resource;
+import domain.ResourceAssign;
 import domain.Victim;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,6 +19,7 @@ import java.sql.Statement;
 import java.util.GregorianCalendar;
 import javax.swing.JOptionPane;
 import utility.DoublyList;
+import utility.SortedLists;
 
 /**
  *
@@ -29,6 +32,7 @@ public final class ConnectDb {
     public final String LOCATIONS = "jdbc:derby://localhost:1527/disaster";
     public final String RESOURCE = "RESOURCE";
     public final String VICTIM = "VICTIM";
+    public final String RESOURCEASSIGN = "RESOURCEASSIGN";
 
     public PreparedStatement stmt = null;
     private Statement st = null;
@@ -277,5 +281,76 @@ public final class ConnectDb {
             }
         }
     }
+    
+    public SortedListInterface getAllSortedVictim(){
+        runConnection();
+        String query = "Select * FROM " + VICTIM;
+        Statement statement;
+        SortedListInterface<Victim> victimList = new SortedLists<>();
+        try {
+            statement = con.createStatement();
+            ResultSet rs = statement.executeQuery(query);
 
+            while (rs.next()) {
+                java.sql.Date tempDate = rs.getDate(3);
+                GregorianCalendar gc = new GregorianCalendar();
+                gc.setTimeInMillis(tempDate.getTime());
+                Victim victim = new Victim(rs.getInt("VICTIM_ID"), rs.getString(2), gc, rs.getString(4), rs.getString(5), rs.getString(6));
+                victimList.add(victim);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return victimList;
+    }
+    
+    public int getVictimFoodCount(int id,String type){
+        runConnection();
+        String queryStr = "SELECT COUNT(*) as total FROM " + RESOURCEASSIGN + 
+                " ress,"+RESOURCE +" res WHERE ress.VICTIM_ID = ? AND res.RES_ID = ress.RES_ID AND type=? ";
+        int count = 0;
+        try {
+            stmt = con.prepareStatement(queryStr);
+            stmt.setInt(1, id);
+            stmt.setString(2, type);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+              count = rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+        return count;
+    }
+
+    public int insertResourceAssign(ResourceAssign resAsgn){
+        runConnection();
+        String query = "INSERT INTO " + RESOURCEASSIGN
+                + " (RES_ID,VICTIM_ID,ASSIGN_TIME,QUANTITY) VALUES (?,?,?,?)";
+        int result = 0;
+        try {
+            PreparedStatement stmt = con.prepareStatement(query);
+            stmt.setInt(1, resAsgn.getResource().getResId());
+            stmt.setInt(2, resAsgn.getVictim().getId());
+            java.sql.Timestamp time = 
+                    new java.sql.Timestamp(resAsgn.getAssigntime().getTimeInMillis());
+            stmt.setTimestamp(3,time );
+            stmt.setInt(4, resAsgn.getQuantity());
+            result = stmt.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+        return result;
+    }
+    
+    public ResourceAssign selectResourceAssign(int resId,int victimId){
+        return null;
+    }
+    
 }

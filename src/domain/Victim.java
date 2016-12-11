@@ -6,6 +6,7 @@
 package domain;
 
 import java.util.GregorianCalendar;
+import utility.MyConverter;
 
 /**
  *
@@ -79,9 +80,20 @@ public class Victim implements Comparable<Victim> {
         this.gender = gender;
     }
 
+    public int getAge(){
+        return MyConverter.getYears(dateOfBirth, new GregorianCalendar());
+    }
+    
     @Override
     public int compareTo(Victim o) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int yearsDiff = MyConverter.getYears(dateOfBirth, new GregorianCalendar());
+        if(yearsDiff < 18){
+            return yearsDiff;
+        }else if (yearsDiff > 55 ){
+            return yearsDiff;
+        }else {
+            return 0;
+        }
     }
     
     

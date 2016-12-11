@@ -19,20 +19,6 @@ import java.util.Scanner;
  */
 public class MyConverter {
 
-    public static GregorianCalendar calcTime(Date time, Date date) {
-        GregorianCalendar gcTime = new GregorianCalendar();
-        gcTime.setTimeInMillis(time.getTime());
-        GregorianCalendar gcDate = new GregorianCalendar();
-        gcDate.setTimeInMillis(date.getTime());
-
-        GregorianCalendar newTime = (GregorianCalendar) gcTime.clone();
-        newTime.set(Calendar.DATE, gcDate.get(Calendar.DATE));
-        newTime.set(Calendar.MONTH, gcDate.get(Calendar.MONTH));
-        newTime.set(Calendar.YEAR, gcDate.get(Calendar.YEAR));
-        return newTime;
-
-    }
-
     public static String getTime(GregorianCalendar gc) {
         String dateString = String.format("%02d", gc.get(Calendar.DATE))
                 + "/" + String.format("%02d", (gc.get(Calendar.MONTH) + 1)) + "/"
@@ -44,15 +30,6 @@ public class MyConverter {
 
     }
 
-
-    public static String displayTime(GregorianCalendar gc) {
-        String timeString = String.format("%02d", gc.get(Calendar.HOUR_OF_DAY)) + ":"
-                + String.format("%02d", gc.get(Calendar.MINUTE)) + ":"
-                + String.format("%02d", gc.get(Calendar.SECOND));
-        return timeString;
-
-    }
-
     public static String displayDate(GregorianCalendar gc) {
         String dateString = String.format("%02d", gc.get(Calendar.DATE))
                 + "/" + String.format("%02d", (gc.get(Calendar.MONTH) + 1)) + "/"
@@ -61,42 +38,7 @@ public class MyConverter {
 
     }
 
-    public static int getHours(GregorianCalendar g1, GregorianCalendar g2) {
-        int elapsed = 0;
-        GregorianCalendar gc1, gc2;
-        boolean validate = false;
-        if (g2.after(g1)) {
-            validate = true;
-            gc2 = (GregorianCalendar) g2.clone();
-            gc1 = (GregorianCalendar) g1.clone();
-        } else {
-            gc2 = (GregorianCalendar) g1.clone();
-            gc1 = (GregorianCalendar) g2.clone();
-        }
-        //g1.clear(Calendar.YEAR);
-        // g1.clear(Calendar.MONTH);
-        //g1.clear(Calendar.DATE);
-        //g1.clear(Calendar.HOUR);
-        g1.clear(Calendar.MINUTE);
-        g1.clear(Calendar.SECOND);
-        //g2.clear(Calendar.YEAR);
-        // g2.clear(Calendar.MONTH);
-        //g2.clear(Calendar.DATE);
-        //g2.clear(Calendar.HOUR);
-        g2.clear(Calendar.MINUTE);
-        g2.clear(Calendar.SECOND);
-        while (gc1.before(gc2)) {
-            gc1.add(Calendar.HOUR, 1);
-            if (validate) {
-                elapsed++;
-            } else {
-                elapsed--;
-            }
-        }
-        return elapsed;
-    }
-
-    public static int getDays(GregorianCalendar g1, GregorianCalendar g2) {
+    public static int getYears(GregorianCalendar g1, GregorianCalendar g2) {
         int elapsed = 0;
         GregorianCalendar gc1, gc2;
         boolean validate = false;
@@ -121,7 +63,7 @@ public class MyConverter {
         g2.clear(Calendar.MINUTE);
         g2.clear(Calendar.SECOND);
         while (gc1.before(gc2)) {
-            gc1.add(Calendar.DATE, 1);
+            gc1.add(Calendar.YEAR, 1);
             if (validate) {
                 elapsed++;
             } else {
@@ -254,8 +196,8 @@ public class MyConverter {
         System.out.println("End");
         GregorianCalendar gc = new GregorianCalendar();
         gc.set(Calendar.HOUR_OF_DAY,gc.get(Calendar.HOUR_OF_DAY)+1);
-        int c = MyConverter.getHours(gc, new GregorianCalendar());
-        System.out.println(c);
+        //int c = MyConverter.getHours(gc, new GregorianCalendar());
+       // System.out.println(c);
 
     }
 

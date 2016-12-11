@@ -40,18 +40,23 @@ public class FoodManager {
             }
         } while (listResource.contains(new Resource(name)));
 
-        String type = "";
-        System.out.print("Please enter the resource type:");
-        type = sc.nextLine();
-        int amount = MyConverter.requestIntegerValue("Please enter the quantity:", 
-                "Please enter the valid quantity!",false);
+        String type = requestResourceType(false);
 
-        Resource resource = new Resource(0, name, type, amount, "Available");
-        int result = db.insertResource(resource);
-        if (result > 0) {
-            System.out.println("Resource has been added successfully");
+        int amount = MyConverter.requestIntegerValue("Please enter the quantity:",
+                "Please enter the valid quantity!", false);
+
+        Resource resource = new Resource(-1, name, type, amount, "Available");
+        boolean confirm = MyConverter.validateOption(
+                "Are you confirm to insert the following data in the database(y/n)?");
+        if (confirm) {
+            int result = db.insertResource(resource);
+            if (result > 0) {
+                System.out.println("Resource has been added successfully");
+            } else {
+                System.out.println("Resource failed to add in database.");
+            }
         } else {
-            System.out.println("Resource failed to add in database.");
+            System.out.println("Insert record is cancelled!!");
         }
 
     }
@@ -86,7 +91,7 @@ public class FoodManager {
 
         int resCode = MyConverter.requestIntegerValue(
                 "Please enter the resource code:",
-                "Please enter the valid numeric id!",false);
+                "Please enter the valid numeric id!", false);
 
         Resource result = db.selectResource(resCode);
 
@@ -130,14 +135,13 @@ public class FoodManager {
 
         int resourceCode = MyConverter.requestIntegerValue(
                 "Please enter the resource code:",
-                "Please enter the valid numeric id!",false);
+                "Please enter the valid numeric id!", false);
 
         Resource result = db.selectResource(resourceCode);
 
         if (result == null) {
             System.out.println("No such resource found in the list.");
         } else {
-
             System.out.println("---------------------------------------");
             printResource(result);
             System.out.println("----------------------------------------");
@@ -150,20 +154,18 @@ public class FoodManager {
                 if (listResource.contains(new Resource(name))) {
                     System.out.println("Resource name cannot be duplicate in the ldatabase.");
                 }
+
             } while (listResource.contains(new Resource(name)) && name == "");
-
-            String type = "";
-            System.out.print("Please enter the resource type:");
-            type = sc.nextLine();
-
-            String quantity = "";
-            do {
-                System.out.print("Please enter the quantity:");
-                quantity = sc.nextLine();
-                if (!quantity.matches("^[0-9]+$")) {
-                    System.out.println("Please enter the valid quantity!");
-                }
-            } while (!quantity.matches("^[0-9]+$"));
+            if ("".equals(name)) {
+                name = result.getName();
+            }
+            String type = requestResourceType(true);
+            if (type.isEmpty()) {
+                type = result.getType();
+            }
+            int amount = MyConverter.requestIntegerValue(
+                    "Please enter the new quantity:",
+                    "Invalid quantity input, only can contain number!!", true);
             String status = "";
             do {
                 System.out.print("Please enter the status(A/NA):");;
@@ -174,23 +176,12 @@ public class FoodManager {
                         break;
                     case "NA":
                         status = "Not Available";
+                        break;
                     default:
                         System.out.println("Please enter a valid input.");
                 }
             } while (status.equals("A") && status.equals("NA"));
 
-            if ("".equals(name)) {
-                name = result.getName();
-            }
-            if ("".equals(type)) {
-                type = result.getType();
-            }
-            int amount = 0;
-            if ("".equals(quantity)) {
-                amount = result.getQuantity();
-            } else {
-                amount = Integer.parseInt(quantity);
-            }
             Resource newResource = new Resource(result.getResId(), name, type, amount, status);
             int results = db.updateResource(newResource);
             if (results > 0) {
@@ -209,6 +200,28 @@ public class FoodManager {
         System.out.println("Resource type:" + resource.getType());
         System.out.println("Resource Quantity::" + resource.getQuantity());
         System.out.println("Resource Status:" + resource.getStatus());
+    }
+
+    public String requestResourceType(boolean allowEmpty) {
+        String type = "";
+        do {
+            int resourceChoice = MyConverter.requestIntegerValue(
+                    "Please enter the resource type(1 for food, 2 for supply):",
+                    "Invalid input, please enter number only!!", allowEmpty);
+            switch (resourceChoice) {
+                case 1:
+                    type = "food";
+                    break;
+                case 2:
+                    type = "supply";
+                    break;
+                case -1:
+                    return type;
+                default:
+                    System.out.println("Please enter the valid choice!!");
+            }
+        } while (!type.equals("food") && !type.equals("supply"));
+        return type;
     }
 
 }
