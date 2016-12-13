@@ -16,9 +16,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import javax.swing.JOptionPane;
 import utility.DoublyList;
+import utility.MyConverter;
 import utility.SortedLists;
 
 /**
@@ -236,9 +238,9 @@ public final class ConnectDb {
         }
         return result;
     }
-    
-    public int updateVictim(Victim victim){
-         runConnection();
+
+    public int updateVictim(Victim victim) {
+        runConnection();
         int result = 0;
         String queryStr = "UPDATE " + VICTIM + " SET NAME = ?, DOB = ?,"
                 + " ADDRESS=? ,STATUS = ?, GENDER = ? WHERE VICTIM_ID = ?";
@@ -281,8 +283,8 @@ public final class ConnectDb {
             }
         }
     }
-    
-    public SortedListInterface getAllSortedVictim(){
+
+    public SortedListInterface getAllSortedVictim() {
         runConnection();
         String query = "Select * FROM " + VICTIM;
         Statement statement;
@@ -305,11 +307,11 @@ public final class ConnectDb {
         }
         return victimList;
     }
-    
-    public int getVictimFoodCount(int id,String type){
+
+    public int getVictimFoodCount(int id, String type) {
         runConnection();
-        String queryStr = "SELECT COUNT(*) as total FROM " + RESOURCEASSIGN + 
-                " ress,"+RESOURCE +" res WHERE ress.VICTIM_ID = ? AND res.RES_ID = ress.RES_ID AND type=? ";
+        String queryStr = "SELECT COUNT(*) as total FROM " + RESOURCEASSIGN
+                + " ress," + RESOURCE + " res WHERE ress.VICTIM_ID = ? AND res.RES_ID = ress.RES_ID AND type=? ";
         int count = 0;
         try {
             stmt = con.prepareStatement(queryStr);
@@ -317,7 +319,7 @@ public final class ConnectDb {
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-              count = rs.getInt(1);
+                count = rs.getInt(1);
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -327,7 +329,7 @@ public final class ConnectDb {
         return count;
     }
 
-    public int insertResourceAssign(ResourceAssign resAsgn){
+    public int insertResourceAssign(ResourceAssign resAsgn) {
         runConnection();
         String query = "INSERT INTO " + RESOURCEASSIGN
                 + " (RES_ID,VICTIM_ID,ASSIGN_TIME,QUANTITY) VALUES (?,?,?,?)";
@@ -336,9 +338,9 @@ public final class ConnectDb {
             PreparedStatement stmt = con.prepareStatement(query);
             stmt.setInt(1, resAsgn.getResource().getResId());
             stmt.setInt(2, resAsgn.getVictim().getId());
-            java.sql.Timestamp time = 
-                    new java.sql.Timestamp(resAsgn.getAssigntime().getTimeInMillis());
-            stmt.setTimestamp(3,time );
+            java.sql.Timestamp time
+                    = new java.sql.Timestamp(resAsgn.getAssigntime().getTimeInMillis());
+            stmt.setTimestamp(3, time);
             stmt.setInt(4, resAsgn.getQuantity());
             result = stmt.executeUpdate();
         } catch (SQLException ex) {
@@ -348,9 +350,72 @@ public final class ConnectDb {
         }
         return result;
     }
-    
-    public ResourceAssign selectResourceAssign(int resId,int victimId){
-        return null;
+
+    public ListInterface<Victim> selectVictimDobRange(
+            GregorianCalendar start, GregorianCalendar end) {
+        runConnection();
+        String query = "Select distinct(resa.VICTIM_ID) FROM " + RESOURCEASSIGN + " resa," + VICTIM
+                + " vic WHERE YEAR(vic.dob) BETWEEN ? AND ? AND resa.VICTIM_ID=vic.VICTIM_ID";
+        ListInterface<Victim> list = new DoublyList<>();
+        try {
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, end.get(Calendar.YEAR));
+            stmt.setInt(2, start.get(Calendar.YEAR));
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Victim victim = selectVictim(rs.getInt(1));
+                list.add(victim);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+        return list;
+    }
+
+    public ListInterface<ResourceAssign> selectResourceAssignWithVictimId(int victimId) {
+        runConnection();
+        String queryStr = "SELECT * FROM " + RESOURCEASSIGN + " WHERE VICTIM_ID = ?";
+        Victim victim = null;
+        ListInterface<ResourceAssign> list = new DoublyList<>();
+        try {
+            stmt = con.prepareStatement(queryStr);
+            stmt.setInt(1, victimId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Resource resource = selectResource(rs.getInt(2));
+                ResourceAssign assign = new ResourceAssign(rs.getInt(1),
+                        resource, victim,
+                        MyConverter.convertDateToGregorian(rs.getTimestamp(4)),
+                        rs.getInt(5));
+                list.add(assign);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+        return list;
     }
     
+    public boolean checkVictimInResourceAssign(int victimId){
+        runConnection();
+        String queryStr = "SELECT * FROM " + RESOURCEASSIGN + " WHERE VICTIM_ID = ?";
+        try {
+            stmt = con.prepareStatement(queryStr);
+            stmt.setInt(1, victimId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+        return false;
+        
+    }
 }

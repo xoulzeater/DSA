@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 /**
  *
  * @author User
+ * @param <T>
  */
 public class SortedLists<T extends Comparable<? super T>> implements SortedListInterface<T>{
 

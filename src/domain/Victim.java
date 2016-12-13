@@ -19,6 +19,7 @@ public class Victim implements Comparable<Victim> {
     private String address;
     private String status;
     private String gender;
+    private int priority;
     
     public Victim(){}
     
@@ -30,6 +31,7 @@ public class Victim implements Comparable<Victim> {
         this.address= address;
         this.status = status;
         this.gender = gender;
+        setPriority();
     }
     
     public int getId(){
@@ -84,15 +86,38 @@ public class Victim implements Comparable<Victim> {
         return MyConverter.getYears(dateOfBirth, new GregorianCalendar());
     }
     
+    public String getPriority(){
+        switch(priority){
+            case 1:
+                return "Adult";
+            case 2:
+                return "Old Folks";
+            case 3:
+                return "Child";
+            default:
+                return "Alien";
+        }
+    }
+    
+    public void setPriority(){
+        if(getAge() < 18){
+            this.priority = 3;
+        }else if (getAge() > 55 ){
+            this.priority=2;
+        }else {
+           this.priority = 1;
+        }
+    }
+    
     @Override
     public int compareTo(Victim o) {
-        int yearsDiff = MyConverter.getYears(dateOfBirth, new GregorianCalendar());
-        if(yearsDiff < 18){
-            return yearsDiff;
-        }else if (yearsDiff > 55 ){
-            return yearsDiff;
-        }else {
+       
+        if(priority > o.priority){
+            return -1;
+        }else if (priority == o.priority ){
             return 0;
+        }else {
+            return 1;
         }
     }
     

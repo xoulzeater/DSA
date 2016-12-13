@@ -6,6 +6,7 @@
 package dsa;
 
 import Manager.FoodManager;
+import Manager.ResourceAssignManager;
 import Manager.StaffManager;
 import Manager.TaskManager;
 import Manager.VictimManager;
@@ -34,7 +35,7 @@ public class DSA {
             System.out.println("Please enter your option:");
             System.out.println("1. Maintain resource.");
             System.out.println("2. Maintain Victim information.");
-            System.out.println("3. Maintain resources.");
+            System.out.println("3. Maintain resources assign.");
             System.out.println("4. Maintain Staff Information.");
             System.out.println("5. Maintain Task information.");
             System.out.println("6. Maintain requests and task assignments.");
@@ -50,6 +51,7 @@ public class DSA {
                     victimMenu();
                     break;
                 case "3":
+                    resourceAssignMenu();
                     break;
                 case "4":
                     staffMenu();
@@ -202,6 +204,38 @@ public class DSA {
                     break;
                 case "4":
                     mgr.viewAllTask();
+                    break;
+                case "0":
+                    return;
+                default:
+                    System.out.println("Invalid optionn please try again!");
+
+            }
+        }
+    }
+    
+    public static void resourceAssignMenu(){
+        ResourceAssignManager mgr = new ResourceAssignManager();
+           for (;;) {
+            System.out.println("=======================================");
+            System.out.println("\t Resource Assign Menu\t");
+            System.out.println("=======================================");
+            System.out.println("Please select an option:");
+            System.out.println("1. Assign resource");
+            System.out.println("2. View all task assigned according to age.");
+            System.out.println("3. View task according to victim id");
+            System.out.println("0. Return to main menu.");
+            System.out.print("Your option:");
+            String option = sc.nextLine();
+            switch (option) {
+                case "1":
+                    mgr.addResourceAssign();
+                    break;
+                case "2":
+                    mgr.findResourceAssignAge();
+                    break;
+                case "3":
+                    mgr.findResourceAssignVictimId();
                     break;
                 case "0":
                     return;

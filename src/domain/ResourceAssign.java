@@ -13,6 +13,7 @@ import java.util.GregorianCalendar;
  */
 public class ResourceAssign {
     
+    private int id;
     private Resource resource;
     private Victim victim;
     private GregorianCalendar assignTime;
@@ -22,8 +23,9 @@ public class ResourceAssign {
     
     }
     
-    public ResourceAssign(Resource res_id,Victim victim,
+    public ResourceAssign(int id,Resource res_id,Victim victim,
             GregorianCalendar assignTime,int quantity){
+        this.id = id;
         this.resource=res_id;
         this.victim = victim;
         this.assignTime = assignTime;
@@ -46,6 +48,14 @@ public class ResourceAssign {
     
     public int getQuantity(){
         return quantity;
+    }
+    
+    public int getId(){
+        return id;
+    }
+    
+    public void setId(int id){
+        this.id = id;
     }
     
     public void setQuantity(int quantity){

@@ -35,8 +35,6 @@ public class ConnectDbStaff {
     private Connection con = null;
     private ResultSet rs = null;
 
-    /*SELECT * FROM resource ORDER BY res_id DESC FETCH FIRST ROW ONLY
-     */
     public void runConnection() {
         try {
             con = DriverManager.getConnection(LOCATIONS, NAME, PASSWORD);

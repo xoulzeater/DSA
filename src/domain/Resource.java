@@ -55,7 +55,7 @@ public class Resource {
         return status;
     }
     
-    public void setResId(int resid){
+    public void setResId(int resId){
         this.resId = resId;
     }
     

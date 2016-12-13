@@ -34,19 +34,25 @@ public class VictimManager {
         System.out.print("Please enter your name:");
         name = sc.nextLine();
 
-        GregorianCalendar gc = MyConverter.readStringCalendar(
-                "Please enter the date of birth(dd/mm/yyyy):",
-                "Please enter the valid date format!!",false,"dd/MM/yyyy");
+        GregorianCalendar gc;
+        do {
+            gc = MyConverter.readStringCalendar(
+                    "Please enter the date of birth(dd/mm/yyyy):",
+                    "Please enter the valid date format!!", false, "dd/MM/yyyy");
+            if (gc.after(new GregorianCalendar())) {
+                System.out.println("Date of birth cannot be future!!!");
+            }
+        } while (gc.after(new GregorianCalendar()));
 
         System.out.print("Please enter the victim address:");
         String address = sc.nextLine();
         String genderOption = MyConverter.requestGender();
-        
+
         Victim victim = new Victim(0, name, gc, address, "Available", genderOption);
         printVictim(victim);
         boolean validate = MyConverter.validateOption(
                 "Are you sure you want to add victim information"
-                        + " in the database(Y/N)?");
+                + " in the database(Y/N)?");
         if (validate) {
             int result = db.insertVictim(victim);
             if (result > 0) {
@@ -68,7 +74,7 @@ public class VictimManager {
 
         int victimId = MyConverter.requestIntegerValue(
                 "Please enter your victim id:",
-                "Invalid Victim Id format, please try again!!",false);
+                "Invalid Victim Id format, please try again!!", false);
         Victim result = db.selectVictim(victimId);
         if (result == null) {
             System.out.println("No Victim information found in the database!");
@@ -80,9 +86,15 @@ public class VictimManager {
             System.out.print("Please enter your new victim name:");
             String name = sc.nextLine();
 
-            GregorianCalendar gc = MyConverter.readStringCalendar(
-                    "Please enter your new victim date of birth(dd/mm/yyyy):",
-                    "Invalid date format, please try again",true,"dd/MM/yyyy");
+            GregorianCalendar gc;
+            do {
+                gc = MyConverter.readStringCalendar(
+                        "Please enter the date of birth(dd/mm/yyyy):",
+                        "Please enter the valid date format!!", false, "dd/MM/yyyy");
+                if (gc.after(new GregorianCalendar())) {
+                    System.out.println("Date of birth cannot be future!!!");
+                }
+            } while (gc.after(new GregorianCalendar()));
             String gender = "";
             do {
                 System.out.print("Please enter your new gender(M/F):");
@@ -95,23 +107,23 @@ public class VictimManager {
             String address = sc.nextLine();
             System.out.print("Please enter the new status:");
             String status = sc.nextLine();
-            if(name.isEmpty()){
+            if (name.isEmpty()) {
                 name = result.getName();
             }
-            if(address.isEmpty()){
+            if (address.isEmpty()) {
                 address = result.getAddress();
             }
-            if(status.isEmpty()){
+            if (status.isEmpty()) {
                 status = result.getStatus();
             }
-            if(gender.isEmpty()){
+            if (gender.isEmpty()) {
                 gender = result.getGender();
             }
-            Victim newVictim = new Victim(result.getId(),name,gc,address,status,gender);
+            Victim newVictim = new Victim(result.getId(), name, gc, address, status, gender);
             int results = db.updateVictim(newVictim);
-            if(results>0){
+            if (results > 0) {
                 System.out.println("Victim record successfully update in database.");
-            }else{
+            } else {
                 System.out.println("Victim record fail to update!!");
             }
         }
@@ -170,7 +182,7 @@ public class VictimManager {
 
         int victimId = MyConverter.requestIntegerValue(
                 "Please enter the victim id:",
-                "Invalid format of victim id!!",false);
+                "Invalid format of victim id!!", false);
         Victim result = db.selectVictim(victimId);
         if (result == null) {
             System.out.println("No such resource found in the list.");
