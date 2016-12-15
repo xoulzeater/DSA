@@ -9,6 +9,7 @@ import Manager.FoodManager;
 import Manager.StaffManager;
 import Manager.TaskManager;
 import Manager.VictimManager;
+import Manager.AssignTaskManager;
 import java.util.Scanner;
 
 /**
@@ -37,7 +38,6 @@ public class DSA {
             System.out.println("3. Maintain resources.");
             System.out.println("4. Maintain Staff Information.");
             System.out.println("5. Maintain Task information.");
-            System.out.println("6. Maintain requests and task assignments.");
             System.out.println("7. Maintain medical services."); 
             System.out.println("0. Exit");
             System.out.print("Your option:");
@@ -56,8 +56,6 @@ public class DSA {
                     break;
                 case "5":
                     taskMenu();
-                    break;
-                case "6":
                     break;
                 case "0":
                     System.out.println("Thank you for using the system!!");
@@ -184,9 +182,11 @@ public class DSA {
             System.out.println("=======================================");
             System.out.println("Please select an option:");
             System.out.println("1. Add task");
-            System.out.println("2. Update task information.");
-            System.out.println("3. Delete task information.");
-            System.out.println("4. View All task information");
+            System.out.println("2. Assign task");
+            System.out.println("3. Update assign task");
+            System.out.println("4. Update task information.");
+            System.out.println("5. Delete task information.");
+            System.out.println("6. View All task information");
             System.out.println("0. Return to main menu.");
             System.out.print("Your option:");
             String option = sc.nextLine();
@@ -195,12 +195,18 @@ public class DSA {
                     mgr.addTask();
                     break;
                 case "2":
-                    mgr.deleteTask();
+                    mgr.assignTask();
                     break;
                 case "3":
-                    mgr.updateTask();
+                    mgr.updateTaskAssign();
                     break;
                 case "4":
+                    mgr.updateTask();
+                    break;
+                case "5":
+                    mgr.deleteTask();
+                    break;
+                case "6":
                     mgr.viewAllTask();
                     break;
                 case "0":
@@ -210,10 +216,5 @@ public class DSA {
 
             }
         }
-    }
-    
-    
-    
-   
-
+    } 
 }

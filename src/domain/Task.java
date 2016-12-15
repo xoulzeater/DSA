@@ -11,27 +11,26 @@ import java.util.GregorianCalendar;
  *
  * @author User
  */
-public class Task {
+public class Task implements Comparable<Task>{
     private int id;
     private String name;
     private String description;
     private int manPower;
-    private GregorianCalendar startTime;
-    private GregorianCalendar endTime;
+    private String priority;
+    private String status;
     
     public Task(){
     
     }
     
     public Task(int id,String name,String description, 
-            int manPower, GregorianCalendar gc, GregorianCalendar gc2){
+            int manPower, String priority, String status){
         this.id=id;
         this.name= name;
         this.description = description;
         this.manPower = manPower;
-        this.startTime=gc;
-        this.endTime = gc2;
-        
+        this.priority = priority;
+        this.status = status;
     }
     
     public int getId(){
@@ -50,12 +49,12 @@ public class Task {
         return manPower;
     }
     
-    public GregorianCalendar getStartDate(){
-        return startTime;
+    public String getPriority() {
+        return priority;
     }
     
-    public GregorianCalendar getEndDate(){
-        return endTime;
+    public String getStatus() {
+        return status;
     }
     
     public void setId(int id){
@@ -74,12 +73,37 @@ public class Task {
         this.manPower = manPower;
     }
     
-    public void setStartDate(GregorianCalendar gc ){
-        this.startTime  = gc;
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
     
-    public void setEndDate(GregorianCalendar gc){
-        this.endTime = gc;
+    private int getPriorityInteger(){
+        switch(priority.toLowerCase()){
+            case "critical":
+                return 3;
+            case "normal":
+                return 2;
+            case "low":
+                return 1;
+            default:
+                return -1;
+        }
+    }
+    
+    @Override
+    public int compareTo(Task o) {
+        if(getPriorityInteger() > o.getPriorityInteger()){
+            return -1;
+        }else if (getPriorityInteger() == o.getPriorityInteger()){
+            return 0;
+        }else{
+            return 1;
+        }
+        
     }
 }
 

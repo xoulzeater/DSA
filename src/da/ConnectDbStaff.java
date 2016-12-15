@@ -6,17 +6,21 @@
 package da;
 
 import adt.ListInterface;
+import adt.SortedListInterface;
 import domain.Staff;
 import domain.Task;
+import domain.TaskAssign;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.GregorianCalendar;
 import javax.swing.JOptionPane;
 import utility.DoublyList;
 import utility.MyConverter;
+import utility.SortedLists;
 
 /**
  *
@@ -29,6 +33,7 @@ public class ConnectDbStaff {
     public final String LOCATIONS = "jdbc:derby://localhost:1527/disaster";
     public final String STAFF = "STAFF";
     public static final String TASK = "TASK";
+    public final String TASKASSIGN = "TASKASSIGN";
 
     public PreparedStatement stmt = null;
     private Statement st = null;
@@ -59,6 +64,30 @@ public class ConnectDbStaff {
                 Staff staff = new Staff(rs.getInt(1),
                         rs.getString(2),
                         MyConverter.convertDateToGregorian(rs.getDate(3)), rs.getString(4), rs.getString(5));
+                staffList.add(staff);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return staffList;
+    }
+    
+    public ListInterface<Staff> getAllAvailableStaff() {
+        runConnection();
+        String query = "Select * FROM " + STAFF + " WHERE STATUS = 'Available'";
+        Statement statement;
+        ListInterface<Staff> staffList = new DoublyList<>();
+        try {
+            statement = con.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+
+            while (rs.next()) {
+                java.sql.Date tempDOB = rs.getDate(3);
+                GregorianCalendar dateOfBirth = new GregorianCalendar();
+                dateOfBirth.setTimeInMillis(tempDOB.getTime());
+                Staff staff = new Staff(rs.getInt("STAFF_ID"), rs.getString(2), dateOfBirth, rs.getString(4), rs.getString(5));
                 staffList.add(staff);
             }
 
@@ -153,6 +182,22 @@ public class ConnectDbStaff {
         }
         return result;
     }
+    
+    public void updateStaffStatus(int staffID) {
+        runConnection();
+        String queryStr = "UPDATE " + STAFF + " SET STATUS = ? WHERE STAFF_ID = ?";
+        try {
+            stmt = con.prepareStatement(queryStr);
+            stmt.setString(1, "Available");
+            stmt.setInt(2, staffID);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+    }
 
     public ListInterface<Task> selectAllTask() {
         runConnection();
@@ -166,8 +211,50 @@ public class ConnectDbStaff {
             while (rs.next()) {
 
                 Task task = new Task(rs.getInt(1), rs.getString(2), rs.getString(3),
-                        rs.getInt(4), MyConverter.convertDateToGregorian(rs.getTimestamp(5)),
-                        MyConverter.convertDateToGregorian(rs.getTimestamp(6)));
+                        rs.getInt(4), rs.getString(5), rs.getString(6));
+                taskList.add(task);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return taskList;
+    }
+    
+    public SortedListInterface getAllSortedTask() {
+        runConnection();
+        String query = "Select * FROM " + TASK + " WHERE STATUS = 'Incomplete'";
+        Statement statement;
+        SortedListInterface<Task> taskList = new SortedLists<>();
+        try {
+            statement = con.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+
+            while (rs.next()) {
+                Task task = new Task(rs.getInt("TASK_ID"), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6));
+                taskList.add(task);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return taskList;
+    }
+    
+    public ListInterface<Task> selectAllCompletingTask() {
+        runConnection();
+        String query = "Select * FROM " + TASK + " WHERE STATUS = 'Completing'";
+        Statement statement;
+        ListInterface<Task> taskList = new DoublyList<>();
+        try {
+            statement = con.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+
+            while (rs.next()) {
+
+                Task task = new Task(rs.getInt(1), rs.getString(2), rs.getString(3),
+                        rs.getInt(4), rs.getString(5), rs.getString(6));
                 taskList.add(task);
             }
         } catch (SQLException ex) {
@@ -198,7 +285,7 @@ public class ConnectDbStaff {
     public int insertTask(Task task) {
         runConnection();
         String query = "INSERT INTO " + TASK
-                + " (NAME,DESCRIPTION,MANPOWER,START_TIME,END_TIME)"
+                + " (NAME,DESCRIPTION,MANPOWER,PRIORITY,STATUS)"
                 + " VALUES (?,?,?,?,?)";
         int result = 0;
         try {
@@ -206,12 +293,8 @@ public class ConnectDbStaff {
             stmt.setString(1, task.getName());
             stmt.setString(2, task.getDescription());
             stmt.setInt(3, task.getManPower());
-            java.sql.Timestamp startDate
-                    = new java.sql.Timestamp(task.getStartDate().getTimeInMillis());
-            stmt.setTimestamp(4, startDate);
-            java.sql.Timestamp endDate = 
-                    new java.sql.Timestamp(task.getEndDate().getTimeInMillis());
-            stmt.setTimestamp(5, endDate);
+            stmt.setString(4, task.getPriority());
+            stmt.setString(5, task.getStatus());
             result = stmt.executeUpdate();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -248,9 +331,7 @@ public class ConnectDbStaff {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                task = new Task(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4),
-                        MyConverter.convertDateToGregorian(rs.getTimestamp(4)),
-                        MyConverter.convertDateToGregorian(rs.getTimestamp(5)));
+                task = new Task(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5), rs.getString(6));
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -276,22 +357,18 @@ public class ConnectDbStaff {
         return result;
     }
     
-   public int updateTask(Task task){
+    public int updateTask(Task task){
         runConnection();
         int result = 0;
         String queryStr = "UPDATE " + TASK + " SET NAME = ?, DESCRIPTION = ?,"
-                + " MANPOWER = ?, START_TIME = ?, END_TIME = ? WHERE STAFF_ID = ?";
+                + " MANPOWER = ?, PRIORITY = ?, STATUS = ? WHERE TASK_ID = ?";
         try {
             stmt = con.prepareStatement(queryStr);
             stmt.setString(1,task.getName());
             stmt.setString(2, task.getDescription());
             stmt.setInt(3, task.getManPower());
-            java.sql.Timestamp date = new java.sql.Timestamp(
-                    task.getStartDate().getTimeInMillis());
-            stmt.setTimestamp(4, date);
-            java.sql.Timestamp date2 = new java.sql.Timestamp(
-                    task.getEndDate().getTimeInMillis());
-            stmt.setTimestamp(5, date2);
+            stmt.setString(4, task.getPriority());
+            stmt.setString(5, task.getStatus());
             stmt.setInt(6, task.getId());
             result = stmt.executeUpdate();
         } catch (SQLException ex) {
@@ -303,6 +380,49 @@ public class ConnectDbStaff {
         return result;
    }
 
+    public void insertAssignTask(TaskAssign taskAssign) {
+        runConnection();
+        String query = "INSERT INTO " + TASKASSIGN
+                + " (TASK_ID,STAFF_ID,TIME)"
+                + " VALUES (?,?,?)";
+        try {
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, taskAssign.getTask_id());
+            stmt.setInt(2, taskAssign.getStaff_id());
+            java.sql.Timestamp time
+                    = new java.sql.Timestamp(taskAssign.getTime().getTimeInMillis());
+            stmt.setTimestamp(3, time);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            close();
+        }
+    }
+    
+    public ListInterface<TaskAssign> selectTaskAssign(int taskId) {
+        runConnection();
+        String query = "Select * FROM " + TASKASSIGN + " WHERE TASK_ID = ?";
+        ListInterface<TaskAssign> taskAssignList = new DoublyList<>();
+        try {
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, taskId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                java.sql.Date tempDate = rs.getDate(3);
+                GregorianCalendar gc = new GregorianCalendar();
+                gc.setTimeInMillis(tempDate.getTime());
+                TaskAssign taskAssign = new TaskAssign(rs.getInt(1), rs.getInt(2), gc);
+                taskAssignList.add(taskAssign);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+        return taskAssignList;
+    }
+   
     private void close() {
         if (rs != null) {
             try {

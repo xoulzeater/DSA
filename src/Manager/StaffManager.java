@@ -56,12 +56,12 @@ public class StaffManager {
         System.out.println("\t View All Staff \t");
         System.out.println("=============================");
         System.out.println("========================================================");
-        System.out.println("|\t Staff Id \t| Name | Date of birth |\tAddress \t| Status | Gender |");
+        System.out.println("|   Staff Id    |         Name         | Date of birth | Gender |   Status   |");
         System.out.println("========================================================");
         ListInterface<Staff> staffList = db.selectAllStaff();
         for (int index = 0; index < staffList.getNumberOfEntries(); index++) {
             Staff tempStaff = staffList.getEntry(index);
-            String msg = String.format("| %-5d \t| %-20s | %-10s | %-10s | %-10s |",
+            String msg = String.format("| %-5d \t| %-20s | %-13s | %-6s | %-10s |",
                     tempStaff.getId(),
                     tempStaff.getName(),
                     MyConverter.displayDate(tempStaff.getDob()),
