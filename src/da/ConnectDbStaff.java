@@ -22,26 +22,11 @@ import utility.MyConverter;
  *
  * @author User
  */
-public class ConnectDbStaff {
+public class ConnectDbStaff extends DataAccess{
 
-    public final String NAME = "nbuser";
-    public final String PASSWORD = "nbuser";
-    public final String LOCATIONS = "jdbc:derby://localhost:1527/disaster";
-    public final String STAFF = "STAFF";
-    public static final String TASK = "TASK";
 
-    public PreparedStatement stmt = null;
-    private Statement st = null;
-    private Connection con = null;
-    private ResultSet rs = null;
 
-    public void runConnection() {
-        try {
-            con = DriverManager.getConnection(LOCATIONS, NAME, PASSWORD);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex, "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+
 
     public ListInterface<Staff> selectAllStaff() {
         runConnection();
@@ -301,30 +286,4 @@ public class ConnectDbStaff {
         return result;
    }
 
-    private void close() {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (Exception e) {
-                /* ignored */ }
-        }
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (Exception e) {
-                /* ignored */ }
-        }
-        if (con != null) {
-            try {
-                con.close();
-            } catch (SQLException ex) {
-            }
-        }
-        if (st != null) {
-            try {
-                st.close();
-            } catch (SQLException ex) {
-            }
-        }
-    }
 }

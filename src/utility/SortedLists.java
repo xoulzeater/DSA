@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
  * @author User
  * @param <T>
  */
-public class SortedLists<T extends Comparable<? super T>> implements SortedListInterface<T>{
+public class SortedLists<T extends Comparable<? super T>> implements SortedListInterface<T> {
 
     private Node firstNode;
     private int length;
@@ -52,7 +52,24 @@ public class SortedLists<T extends Comparable<? super T>> implements SortedListI
 
     @Override
     public boolean remove(T anEntry) {
-        throw new UnsupportedOperationException();	// Left as Practical exercise
+
+        Node nodeBefore = null;				
+        Node currentNode = firstNode;				
+        while (currentNode != null && anEntry.compareTo(currentNode.data) != 0) {
+            nodeBefore = currentNode;
+            currentNode = currentNode.next;
+        }
+        if (currentNode == null) {
+            return false;
+        }
+
+        if (isEmpty() || (nodeBefore == null)) { 
+            firstNode = currentNode;
+        } else {	
+            nodeBefore.next = currentNode.next;
+        }
+        length--;
+        return true;
     }
 
     @Override
@@ -148,7 +165,7 @@ public class SortedLists<T extends Comparable<? super T>> implements SortedListI
 
     @Override
     public Iterator<T> iterator() {
-         return new ListIterator();
+        return new ListIterator();
     }
 
     private class Node {

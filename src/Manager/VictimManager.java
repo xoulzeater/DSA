@@ -5,8 +5,11 @@
  */
 package Manager;
 
+import adt.DataAccessInterface;
 import adt.ListInterface;
+import adt.ManagerInterface;
 import da.ConnectDb;
+import da.VictimDataAccess;
 import domain.Victim;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
@@ -16,19 +19,21 @@ import utility.MyConverter;
  *
  * @author User
  */
-public class VictimManager {
+public class VictimManager implements ManagerInterface{
 
-    private Scanner sc;
+    private final Scanner sc;
+    private final DataAccessInterface<Victim> da;
 
     public VictimManager() {
         sc = new Scanner(System.in);
+        da = new VictimDataAccess();
     }
 
-    public void addVictim() {
-        ConnectDb db = new ConnectDb();
-        System.out.println("=============================");
+    @Override
+    public void displayInsertRecord() {
+        System.out.println("=========================");
         System.out.println("|\t Add Victim \t|");
-        System.out.println("=============================");
+        System.out.println("=========================");
 
         String name = "";
         System.out.print("Please enter your name:");
@@ -47,14 +52,14 @@ public class VictimManager {
         System.out.print("Please enter the victim address:");
         String address = sc.nextLine();
         String genderOption = MyConverter.requestGender();
-
+        System.out.println("----------------------------------------");
         Victim victim = new Victim(0, name, gc, address, "Available", genderOption);
         printVictim(victim);
         boolean validate = MyConverter.validateOption(
                 "Are you sure you want to add victim information"
                 + " in the database(Y/N)?");
         if (validate) {
-            int result = db.insertVictim(victim);
+            int result = da.addOneRecord(victim);
             if (result > 0) {
                 System.out.println("Victim successful added in database!");
             } else {
@@ -66,8 +71,9 @@ public class VictimManager {
 
     }
 
-    public void updateVictim() {
-        ConnectDb db = new ConnectDb();
+
+    @Override
+    public void displayUpdateRecord() {
         System.out.println("=============================");
         System.out.println("|\t Update Victim Information \t|");
         System.out.println("=============================");
@@ -75,7 +81,7 @@ public class VictimManager {
         int victimId = MyConverter.requestIntegerValue(
                 "Please enter your victim id:",
                 "Invalid Victim Id format, please try again!!", false);
-        Victim result = db.selectVictim(victimId);
+        Victim result =  da.selectOneRecord(victimId);
         if (result == null) {
             System.out.println("No Victim information found in the database!");
         } else {
@@ -120,7 +126,7 @@ public class VictimManager {
                 gender = result.getGender();
             }
             Victim newVictim = new Victim(result.getId(), name, gc, address, status, gender);
-            int results = db.updateVictim(newVictim);
+            int results = da.updateRecord(newVictim);
             if (results > 0) {
                 System.out.println("Victim record successfully update in database.");
             } else {
@@ -129,12 +135,18 @@ public class VictimManager {
         }
     }
 
-    public void viewAllVictim() {
-        ConnectDb db = new ConnectDb();
-        System.out.println("=============================");
+
+    @Override
+    public void displayAllRecord() {
+        System.out.println("=========================================");
         System.out.println("|\t View All Victim Information \t|");
-        System.out.println("=============================");
-        ListInterface<Victim> victimList = db.selectAllVictim();
+        System.out.println("=========================================");
+        ListInterface<Victim> victimList =  da.selectAllRecord();
+        String title = String.format("| %-5s | %-20s | %-10s | %-50s | %-10s | %-10s|",
+                    "ID", "Name","Date","Address","Status", "Gender");
+        System.out.println("===========================================================================================================================");
+        System.out.println(title);
+        System.out.println("===========================================================================================================================");
         for (Victim victim : victimList) {
             String msg = String.format("| %-5d | %-20s | %-10s | %-50s | %-10s | %-10s|",
                     victim.getId(), victim.getName(),
@@ -147,7 +159,6 @@ public class VictimManager {
     }
 
     public void printVictim(Victim victim) {
-        System.out.println("Victim ID:" + victim.getId());
         System.out.println("Victim name:" + victim.getName());
         System.out.println("Date of birth:"
                 + MyConverter.displayDate(victim.getDateOfBirth()));
@@ -173,17 +184,17 @@ public class VictimManager {
         return null;
     }
 
-    public void deleteVictim() {
+    @Override
+    public void displayDeleteRecord() {
         ConnectDb db = new ConnectDb();
         System.out.println("=============================");
-
         System.out.println("|\t !! DELETE VICTIM INFORMATION !!\t|");
         System.out.println("=============================");
 
         int victimId = MyConverter.requestIntegerValue(
                 "Please enter the victim id:",
                 "Invalid format of victim id!!", false);
-        Victim result = db.selectVictim(victimId);
+        Victim result = da.selectOneRecord(victimId);
         if (result == null) {
             System.out.println("No such resource found in the list.");
         } else {
@@ -214,5 +225,6 @@ public class VictimManager {
         }
 
     }
+
 
 }

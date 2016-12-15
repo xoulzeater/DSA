@@ -5,8 +5,11 @@
  */
 package Manager;
 
+import adt.DataAccessInterface;
 import adt.ListInterface;
+import adt.ManagerInterface;
 import da.ConnectDb;
+import da.ResourceDataAccess;
 import domain.Resource;
 import java.util.Scanner;
 import utility.MyConverter;
@@ -15,22 +18,23 @@ import utility.MyConverter;
  *
  * @author User
  */
-public class FoodManager {
+public class FoodManager implements ManagerInterface{
 
-    private Scanner sc;
+    private final Scanner sc;
+    private final DataAccessInterface<Resource> da;
 
     public FoodManager() {
         sc = new Scanner(System.in);
+        da = new ResourceDataAccess();
 
     }
 
-    public void addFood() {
+    @Override
+    public void displayInsertRecord() {
         System.out.println("============================");
         System.out.println("\t Add Resource \t");
         System.out.println("============================");
-
-        ConnectDb db = new ConnectDb();
-        ListInterface<Resource> listResource = db.selectAllResource();
+        ListInterface<Resource> listResource = da.selectAllRecord();
         String name = "";
         do {
             System.out.print("Please enter your resource name:");
@@ -49,7 +53,7 @@ public class FoodManager {
         boolean confirm = MyConverter.validateOption(
                 "Are you confirm to insert the following data in the database(y/n)?");
         if (confirm) {
-            int result = db.insertResource(resource);
+            int result = da.addOneRecord(resource);
             if (result > 0) {
                 System.out.println("Resource has been added successfully");
             } else {
@@ -61,39 +65,41 @@ public class FoodManager {
 
     }
 
-    public void viewAllFood() {
-        ConnectDb db = new ConnectDb();
+    @Override
+    public void displayAllRecord() {
 
-        ListInterface<Resource> resourceList = db.selectAllResource();
+        ListInterface<Resource> resourceList = da.selectAllRecord();
         System.out.println("=============================");
         System.out.println("\t View All Resource \t");
         System.out.println("=============================");
-        System.out.println("========================================================");
-        System.out.println("|\t ID \t|\t Food Name \t |\t Food category \t| Quantity |\t Status\t|");
-        System.out.println("========================================================");
+        System.out.println("=================================================================================");
+        System.out.println("|\t ID \t|\t Food Name \t |Food category| Quantity |\t Status\t|");
+        System.out.println("=================================================================================");
         for (int index = 0; index < resourceList.getNumberOfEntries(); index++) {
             Resource temp = resourceList.getEntry(index);
-            String msg = String.format("| %-10d \t | %-15s\t| %-10s | %-5d | %-10s| ",
+            String msg = String.format("| %-10d \t | %-15s\t| %-12s | %-8d | %-12s| ",
                     temp.getResId(), temp.getName(),
                     temp.getType(), temp.getQuantity(), temp.getStatus());
             System.out.println(msg);
         }
+        System.out.println("=================================================================================");
         System.out.print("Press enter to continue...");
         sc.nextLine();
 
     }
 
-    public void deleteFood() {
-        ConnectDb db = new ConnectDb();
-        System.out.println("====================================");
-        System.out.println("| \t !!! DELETE FOOD !!! \t|");
-        System.out.println("====================================");
+
+    @Override
+    public void displayDeleteRecord() {
+        System.out.println("=========================================");
+        System.out.println("| \t !!! DELETE Resource !!! \t|");
+        System.out.println("=========================================");
 
         int resCode = MyConverter.requestIntegerValue(
                 "Please enter the resource code:",
                 "Please enter the valid numeric id!", false);
 
-        Resource result = db.selectResource(resCode);
+        Resource result = da.selectOneRecord(resCode);
 
         if (result == null) {
             System.out.println("No such resource found in the list.");
@@ -102,42 +108,32 @@ public class FoodManager {
             System.out.println("---------------------------------------");
             printResource(result);
             System.out.println("----------------------------------------");
-            for (;;) {
-                System.out.print("Are you sure you want to delete the food information?(Y/N)");
-                switch (sc.nextLine().toUpperCase()) {
-                    case "Y":
-
-                        /*remember uncommnent */
-                        //int results = db.deleteResource(result.getResId());
-                        int results = 0;
-                        if (results > 0) {
-                            System.out.println("Food deleted successfully!");
-                        } else {
-                            System.out.println("Food failed to delete!!");
-                        }
-                        return;
-                    case "N":
-                        System.out.println("Action delete food is cancelled!");
-                        return;
-                    default:
-                        System.out.println("Please enter the valid input!");
-                        break;
+            boolean option = MyConverter.validateOption("Are you sure you want to delete the food information?(Y/N):");
+            if (option) {
+                //int results = db.deleteResource(result.getResId());
+                int results = 0;
+                if (results > 0) {
+                    System.out.println("Resource deleted successfully!");
+                } else {
+                    System.out.println("Resource failed to delete!!");
                 }
+            } else {
+                System.out.println("Resource is cancelled to be deleted!!!");
             }
         }
     }
 
-    public void updateFood() {
-        ConnectDb db = new ConnectDb();
-        System.out.println("==========================");
-        System.out.println("| \t Update Food \t | ");
-        System.out.println("==========================");
+    @Override
+    public void displayUpdateRecord() {
+        System.out.println("==================================");
+        System.out.println("| \t Update Resource \t | ");
+        System.out.println("==================================");
 
         int resourceCode = MyConverter.requestIntegerValue(
                 "Please enter the resource code:",
                 "Please enter the valid numeric id!", false);
 
-        Resource result = db.selectResource(resourceCode);
+        Resource result = da.selectOneRecord(resourceCode);
 
         if (result == null) {
             System.out.println("No such resource found in the list.");
@@ -145,7 +141,7 @@ public class FoodManager {
             System.out.println("---------------------------------------");
             printResource(result);
             System.out.println("----------------------------------------");
-            ListInterface<Resource> listResource = db.selectAllResource();
+            ListInterface<Resource> listResource = da.selectAllRecord();
             System.out.println("<< BLANK FOR REMAIN SAME >>");
             String name = "";
             do {
@@ -182,17 +178,23 @@ public class FoodManager {
                 }
             } while (status.equals("A") && status.equals("NA"));
 
-            Resource newResource = new Resource(result.getResId(), name, type, amount, status);
-            int results = db.updateResource(newResource);
-            if (results > 0) {
-                System.out.println("Resource information update successfully!!");
+            boolean option = MyConverter.validateOption("Are you sure you want to update these information in the database(y/n)?:");
+            if (option) {
+                Resource newResource = new Resource(result.getResId(), name, type, amount, status);
+                int results = da.updateRecord(newResource);
+                if (results > 0) {
+                    System.out.println("Resource information update successfully!!");
+                } else {
+                    System.out.println("Resource information update failed!!");
+                }
             } else {
-                System.out.println("Resource information update failed!!");
+                System.out.println("Resource information update is cancelled!!");
             }
 
         }
 
     }
+
 
     public void printResource(Resource resource) {
         System.out.println("Resource ID::" + resource.getResId());
@@ -202,7 +204,7 @@ public class FoodManager {
         System.out.println("Resource Status:" + resource.getStatus());
     }
 
-    public String requestResourceType(boolean allowEmpty) {
+    private String requestResourceType(boolean allowEmpty) {
         String type = "";
         do {
             int resourceChoice = MyConverter.requestIntegerValue(

@@ -5,9 +5,12 @@
  */
 package Manager;
 
+import adt.DataAccessInterface;
 import adt.ListInterface;
 import adt.SortedListInterface;
 import da.ConnectDb;
+import da.ResourceDataAccess;
+import da.VictimDataAccess;
 import domain.Resource;
 import domain.ResourceAssign;
 import domain.Victim;
@@ -20,25 +23,32 @@ import utility.MyConverter;
  *
  * @author User
  */
-public class ResourceAssignManager {
+public class ResourceAssignManager{
 
     private Scanner sc;
     private VictimManager vicMgr;
     private ConnectDb db;
+    private DataAccessInterface<Victim> vicDa;
+    private DataAccessInterface<Resource> resDa;
 
     public ResourceAssignManager() {
         sc = new Scanner(System.in);
         vicMgr = new VictimManager();
         db = new ConnectDb();
+        vicDa = new VictimDataAccess();
+        resDa = new ResourceDataAccess();
+        
     }
 
     public void addResourceAssign() {
-        System.out.println("----------------------------------");
+        System.out.println("--------------------------------");
         System.out.println("|\t Resource Assign \t|");
-        System.out.println("----------------------------------");
+        System.out.println("--------------------------------");
         System.out.println("List of victim");
         System.out.println("----------------------");
+        System.out.println("-----------------------------------------------------------------------------------------");
         System.out.println("ID \t Name \t\t\t Age \t Food Assigned \t Supply Assigned \t Priority ");
+        System.out.println("-----------------------------------------------------------------------------------------");
         SortedListInterface<Victim> list = db.getAllSortedVictim();
         for (Victim temp : list) {
             System.out.println(temp.getId() + "\t "
@@ -47,23 +57,25 @@ public class ResourceAssignManager {
                     + db.getVictimFoodCount(temp.getId(), "supply") + "\t\t" + temp.getPriority());
         }
 
-        System.out.println("---------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------------------------");
         System.out.println("List of supply and food");
         System.out.println("----------------------");
-        ListInterface<Resource> resourceList = db.selectAllResource();
-        System.out.println("ID \t Name \t\t\t Resource type \t Quantity \t  ");
+        ListInterface<Resource> resourceList = resDa.selectAllRecord();
+        System.out.println("----------------------------------------------------------");
+        System.out.println("ID  \t Name \t\t\t Resource type \t Quantity \t  ");
+        System.out.println("----------------------------------------------------------");
         for (Resource temp : resourceList) {
             System.out.println(temp.getResId() + "\t" + String.format("%-20s", temp.getName())
                     + "\t\t" + temp.getType() + " \t " + temp.getQuantity());
         }
-        System.out.println("---------------------------------------------------------");
+        System.out.println("----------------------------------------------------------");
         int victimId = 0;
         Victim victim = null;
         do {
             victimId = MyConverter.requestIntegerValue(
                     "Please enter your victim id:",
                     "Please enter the valid number format!!", false);
-            victim = db.selectVictim(victimId);
+            victim = vicDa.selectOneRecord(victimId);
             if (victim == null) {
                 System.out.println("Please enter the victim id given or valid one!!");
             }
@@ -74,7 +86,7 @@ public class ResourceAssignManager {
             resourceId = MyConverter.requestIntegerValue(
                     "Please enter your resource id:",
                     "Invalid resource id format, please try again!!", false);
-            resource = db.selectResource(resourceId);
+            resource = resDa.selectOneRecord(resourceId);
             if (resource == null) {
                 System.out.println("Please enter the resource id given or valid one!!");
             }
@@ -111,7 +123,7 @@ public class ResourceAssignManager {
         if (validate) {
 
             resource.setQuantity(resource.getQuantity() - quantity);
-            int resourceRow = db.updateResource(resource);
+            int resourceRow = resDa.updateRecord(resource);
             if (resourceRow > 0) {
                 System.out.println("Resource information successfully updated");
             } else {
@@ -131,10 +143,10 @@ public class ResourceAssignManager {
 
     }
 
-    public void findResourceAssignAge() {
-        System.out.println("-----------------------------");
+    public void findResourceAssignByAge() {
+        System.out.println("----------------------------------------------");
         System.out.println("|\t Print Resource Assignment \t|");
-        System.out.println("-----------------------------");
+        System.out.println("----------------------------------------------");
         System.out.println("Please enter the range of age of the victim:");
         int startAge = 0;
         int endAge = 0;
@@ -163,50 +175,55 @@ public class ResourceAssignManager {
 
     }
 
-    public void findResourceAssignVictimId() {
+    public void findResourceAssignByVictimId() {
         System.out.println("-----------------------------");
         System.out.println("|\t Print Resource Assignment \t|");
         System.out.println("-----------------------------");
 
         int victimId = MyConverter.requestIntegerValue("Please enter the victim id:", "Invalid input format of victim, please try again!!", false);
         
-        Victim result = db.selectVictim(victimId);
+        Victim result = vicDa.selectOneRecord(victimId);
         if(result == null){
             System.out.println("No victim result in the database, please try again");
         }else{
             if(db.checkVictimInResourceAssign(victimId)){
-                System.out.println("Current victim has zero assignment!!");
-            }else{
                 printResourceAssign(result);
+            }else{
+                System.out.println("Current victim has zero assignment!!");
             }
         }
         
     }
 
-    public void printResourceAssign(Victim victim) {
+    private void printResourceAssign(Victim victim) {
+        System.out.println("<<---------------------->> ");
         System.out.println("Victim ID:" + victim.getId());
-        System.out.println("Name:" + victim.getName());
-        System.out.println("Age:" + victim.getAge());
+        System.out.println("Name     :" + victim.getName());
+        System.out.println("Age      :" + victim.getAge());
         ListInterface<ResourceAssign> asgnList
                 = db.selectResourceAssignWithVictimId(victim.getId());
         System.out.println("Resource Assigned List");
-        System.out.println("----------------");
-        System.out.println("\t|Name \t\t| Resource Type | Quantity |\tTime Assigned\t\t |");
+        System.out.println("----------------------");
+        System.out.println("\t-----------------------------------------------------------------------");
+         String title = String.format("\t| %-15s | %-13s | %-7s | %-23s|",
+                    "Name","Resource Type","Quantity","Time Assigned");
+        System.out.println(title);
+        System.out.println("\t-----------------------------------------------------------------------");
         for (ResourceAssign temp1 : asgnList) {
-            String msg = String.format("\t %-20s \t %-10s \t %-5d \t %-30s ",
+            String msg = String.format("\t| %-15s | %-13s | %-7d | %-23s |",
                     temp1.getResource().getName(),
                     temp1.getResource().getType(), temp1.getQuantity(),
                     MyConverter.getTime(temp1.getAssigntime()));
             System.out.println(msg);
         }
-        System.out.println("----------------");
+        System.out.println("\t-----------------------------------------------------------------------");
 
     }
 
     public static void main(String[] args) {
         ResourceAssignManager rc = new ResourceAssignManager();
         //rc.addResourceAssign();
-        rc.findResourceAssignAge();
+       // rc.findResourceAssignAge();
         
     }
 }
